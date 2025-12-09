@@ -127,13 +127,6 @@
             font-weight: 600;
             color: var(--dark-color);
         }
-        .question-image {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin-top: 15px;
-            border: 1px solid #ddd;
-        }
         .options {
             display: flex;
             flex-direction: column;
@@ -256,7 +249,7 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            max-width: 300px;
+            max-width: 350px;
             margin: 20px auto;
             gap: 10px;
             border: 1px solid #ddd;
@@ -264,6 +257,11 @@
             border-radius: 8px;
         }
         #chapter-selection label { font-size: 1.1rem; }
+        .question-count {
+            font-size: 0.9em;
+            color: #777;
+            margin-right: 8px;
+        }
         #num-questions-input {
             width: 100px;
             padding: 10px;
@@ -336,8 +334,8 @@
             <h2>به آزمون جامع خوش آمدید</h2>
             <p>لطفاً فصل(های) مورد نظر و تعداد سوالات را انتخاب کنید.</p>
             <div id="chapter-selection">
-                <label><input type="checkbox" class="chapter-checkbox" value="1" checked> فصل اول (کلیات)</label>
-                <label><input type="checkbox" class="chapter-checkbox" value="2" checked> فصل دوم (گروه‌بندی)</label>
+                <label><input type="checkbox" class="chapter-checkbox" value="1" checked> فصل اول (کلیات)<span class="question-count"></span></label>
+                <label><input type="checkbox" class="chapter-checkbox" value="2" checked> فصل دوم (گروه‌بندی)<span class="question-count"></span></label>
                 <!-- For new chapters, add a new label line here -->
             </div>
             <div>
@@ -435,8 +433,27 @@
         if (typeof chapter1Questions !== 'undefined') allQuestions = allQuestions.concat(chapter1Questions);
         if (typeof chapter2Questions !== 'undefined') allQuestions = allQuestions.concat(chapter2Questions);
         // For new chapters, add a similar line here
+        
+        function updateChapterCountsOnLoad() {
+            const chapterCounts = {};
+            allQuestions.forEach(q => {
+                chapterCounts[q.chapter] = (chapterCounts[q.chapter] || 0) + 1;
+            });
 
+            document.querySelectorAll('#chapter-selection label').forEach(label => {
+                const checkbox = label.querySelector('input');
+                const chapterValue = checkbox.value;
+                const count = chapterCounts[chapterValue];
+                const countSpan = label.querySelector('.question-count');
+
+                if (countSpan && count) {
+                    countSpan.textContent = `(${count} سوال)`;
+                }
+            });
+        }
+        
         // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', updateChapterCountsOnLoad);
         startBtn.addEventListener('click', generateAndStartQuiz);
         prevBtn.addEventListener('click', () => navigate(-1));
         nextBtn.addEventListener('click', handleNextButton);
@@ -495,6 +512,7 @@
 
         function loadQuestion(index) {
             const question = activeQuizQuestions[index];
+            let imageHTML = question.image ? `<img src="${question.image}" alt="تصویر سوال" class="question-image">` : '';
             let optionsHTML = '';
             question.options.forEach((option, optIndex) => {
                 optionsHTML += `
@@ -510,6 +528,7 @@
                         <div class="question-number">${index + 1}</div>
                         <p class="question-text">${question.question}</p>
                     </div>
+                    ${imageHTML}
                     <div class="options">${optionsHTML}</div>
                 </div>`;
             document.querySelectorAll('.option').forEach(el => el.addEventListener('click', handleOptionSelect));
