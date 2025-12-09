@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>آزمون جامع با قابلیت تصویر در گزینه‌ها</title>
+    <title>آزمون جامع با پاسخ تشریحی</title>
     
     <!-- Google Fonts - Vazirmatn -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -356,6 +356,23 @@
             background-color: #d1f7c4 !important;
             border: 1px solid #4caf50 !important;
         }
+        .review-explanation {
+            background-color: #fffbe6;
+            border: 1px solid #ffe58f;
+            border-right: 5px solid var(--warning-color);
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+            font-size: 0.95em;
+            line-height: 1.8;
+        }
+        .review-explanation::before {
+            content: '\f05a'; /* info-circle icon */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-left: 10px;
+            color: var(--warning-color);
+        }
 
         /* --- Responsive Styles --- */
         @media (max-width: 992px) {
@@ -414,10 +431,10 @@
     <div class="container">
         <!-- Start Page -->
         <div id="start-container">
-            <h2>به آزمون جامع CNC خوش آمدید</h2>
-            <p>لطفاً تعداد سوالات مورد نظر خود را وارد کنید. برای هر سوال به طور میانگین ۱ دقیقه زمان خواهید داشت.</p>
+            <h2>به آزمون خوش آمدید</h2>
+            <p>لطفاً تعداد سوالات مورد نظر خود را وارد کنید.</p>
             <div>
-                <input type="number" id="num-questions-input" value="20" min="1">
+                <input type="number" id="num-questions-input" value="10" min="1">
             </div>
             <button class="btn btn-primary" id="start-btn" style="margin-top: 20px;">شروع آزمون</button>
         </div>
@@ -426,7 +443,7 @@
         <div id="quiz-area" style="display: none;">
             <header>
                 <div class="logo"><i class="fas fa-cogs"></i></div>
-                <h1>آزمون تراشکار CNC</h1>
+                <h1>آزمون لوله کشی گاز خانگی</h1>
                 <div id="timer-display"><i class="far fa-clock"></i> <span>--:--</span></div>
             </header>
             
@@ -509,14 +526,6 @@
         let examSubmitted = false;
         const allQuestions = typeof questions !== 'undefined' ? questions : [];
 
-        // --- Initialization ---
-        allQuestions.forEach(q => {
-            if (!q.category) {
-                const cncKeywords = ['cnc', 'g-code', 'm-code', 'g01', 'g00', 'g96', 'اسپیندل', 'کنترل عددی', 'محور', 'فرمان', 'سیکل', 'm03', 'm05'];
-                q.category = cncKeywords.some(keyword => q.question.toLowerCase().includes(keyword)) ? 'cnc' : 'other';
-            }
-        });
-
         // --- Event Listeners ---
         startBtn.addEventListener('click', generateAndStartQuiz);
         prevBtn.addEventListener('click', () => navigate(-1));
@@ -545,26 +554,8 @@
         }
 
         function selectRandomQuestions(count) {
-            const cncQuestions = allQuestions.filter(q => q.category === 'cnc');
-            const otherQuestions = allQuestions.filter(q => q.category === 'other');
-            let numCnc = Math.ceil(count * 0.7);
-            let numOther = count - numCnc;
-            if (numCnc > cncQuestions.length) {
-                numCnc = cncQuestions.length;
-                numOther = count - numCnc;
-            }
-            if (numOther < 0) numOther = 0;
-            if (numOther > otherQuestions.length) {
-                numOther = otherQuestions.length;
-                if (count > allQuestions.length) count = allQuestions.length;
-                numCnc = count - numOther;
-            }
-            if (numCnc < 0) numCnc = 0;
-            const shuffledCnc = shuffleArray([...cncQuestions]);
-            const shuffledOther = shuffleArray([...otherQuestions]);
-            const selectedCnc = shuffledCnc.slice(0, numCnc);
-            const selectedOther = shuffledOther.slice(0, numOther);
-            activeQuizQuestions = shuffleArray([...selectedCnc, ...selectedOther]);
+            const shuffled = shuffleArray([...allQuestions]);
+            activeQuizQuestions = shuffled.slice(0, count);
             userAnswers = new Array(activeQuizQuestions.length).fill(null);
             markedQuestions = new Array(activeQuizQuestions.length).fill(false);
         }
@@ -599,7 +590,6 @@
             let optionsHTML = '';
             question.options.forEach((option, optIndex) => {
                 let optionContent = '';
-                // Check if option is an object (for text + image) or a string (for text only)
                 if (typeof option === 'object' && option !== null) {
                     optionContent = `<div class="option-content">`;
                     if (option.image) {
@@ -779,6 +769,11 @@
                 if (q.image) {
                     imageReviewHTML = `<img src="${q.image}" alt="تصویر سوال" class="question-image">`;
                 }
+
+                let explanationHTML = '';
+                if (q.explanation) {
+                    explanationHTML = `<div class="review-explanation">${q.explanation}</div>`;
+                }
                 
                 let optionsReviewHTML = '';
                 q.options.forEach((opt, optIndex) => {
@@ -808,6 +803,7 @@
                         <p>${i + 1}. ${q.question}</p>
                         ${imageReviewHTML}
                         ${optionsReviewHTML}
+                        ${explanationHTML}
                     </div>`;
             });
             reviewContent.innerHTML = reviewHTML;
