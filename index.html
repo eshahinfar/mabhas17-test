@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آزمون جامع با قابلیت تصویر در گزینه‌ها</title>
+    
+    <!-- Google Fonts - Vazirmatn -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Internal CSS Block -->
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --dark-color: #2c3e50;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --font-family: 'Vazirmatn', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family);
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.7;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+
+        .logo {
+            position: absolute;
+            left: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2.5rem;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .exam-info {
+            display: flex;
+            justify-content: space-around;
+            background-color: var(--light-color);
+            padding: 15px;
+            border-bottom: 2px solid #ddd;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+
+        .info-item i {
+            font-size: 1.2rem;
+            color: var(--secondary-color);
+        }
+
+        #timer-display {
+            background-color: var(--warning-color);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: row;
+            min-height: 500px;
+        }
+
+        .questions-section {
+            flex: 3;
+            padding: 25px;
+        }
+
+        .question-nav {
+            flex: 1;
+            padding: 25px;
+            background-color: #f9f9f9;
+            border-right: 1px solid #eee;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .question {
+            margin-bottom: 30px;
+        }
+        
+        .question-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 1px solid #ddd;
+        }
+
+        .question-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .question-number {
+            background-color: var(--secondary-color);
+            color: white;
+            min-width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-right: 55px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .option-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-grow: 1;
+        }
+        
+        .option-image {
+            height: 50px;
+            width: 50px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .option:hover {
+            background-color: #e8f4fc;
+            border-color: var(--secondary-color);
+        }
+
+        .option.selected {
+            background-color: #d1e7fd;
+            border-color: var(--secondary-color);
+        }
+
+        .option input[type="radio"] {
+            margin-left: 10px;
+            transform: scale(1.2);
+        }
+
+        .option label {
+            cursor: pointer;
+            flex-grow: 1;
+            font-size: 1.05rem;
+        }
+
+        .nav-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--secondary-color);
+            font-weight: 700;
+        }
+
+        .question-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+            gap: 10px;
+        }
+
+        .q-btn {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            background-color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .q-btn.answered {
+            background-color: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+
+        .q-btn.current {
+            background-color: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        .q-btn.marked {
+            position: relative;
+        }
+        .q-btn.marked::after {
+            content: '\f02e'; /* Font Awesome bookmark icon */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: var(--warning-color);
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 1rem;
+            background: white;
+            border-radius: 50%;
+            padding: 2px;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        .btn-danger {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        #start-container { padding: 50px; text-align: center; }
+        #num-questions-input { width: 100px; padding: 10px; margin-top: 15px; border: 2px solid #ccc; border-radius: 5px; font-size: 1.1em; text-align: center; }
+
+        .results-page { display: none; }
+
+        .review-container {
+            padding: 20px;
+        }
+        .review-question {
+            border-bottom: 1px solid #eee;
+            padding: 20px 0;
+            text-align: right;
+        }
+         .review-option {
+             display: flex;
+            align-items: center;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+        }
+        .review-option.user-incorrect {
+            background-color: #f8d7da !important;
+            border: 1px solid #dc3545 !important;
+        }
+        .review-option.correct-answer {
+            background-color: #d1f7c4 !important;
+            border: 1px solid #4caf50 !important;
+        }
+
+        /* --- Responsive Styles --- */
+        @media (max-width: 992px) {
+            .main-content {
+                flex-direction: column; 
+            }
+            .questions-section {
+                order: 1; 
+                border-left: none;
+            }
+            .question-nav {
+                order: 2; 
+                min-width: unset;
+                width: 100%;
+                border-right: none;
+                border-top: 2px solid #ddd;
+            }
+            .logo {
+                display: none;
+            }
+        }
+        @media (max-width: 576px) {
+            body {
+                padding: 5px;
+            }
+            .container {
+                border-radius: 0;
+            }
+            header, .questions-section, .question-nav, .review-container {
+                padding: 15px;
+            }
+            header h1 {
+                font-size: 1.4rem;
+            }
+            #timer-display {
+                font-size: 1rem;
+                padding: 5px 10px;
+            }
+            .question-text {
+                font-size: 1.1rem;
+            }
+            .options {
+                padding-right: 0;
+            }
+            .question-header {
+                gap: 10px;
+            }
+            .actions .btn-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Start Page -->
+        <div id="start-container">
+            <h2>به آزمون جامع CNC خوش آمدید</h2>
+            <p>لطفاً تعداد سوالات مورد نظر خود را وارد کنید. برای هر سوال به طور میانگین ۱ دقیقه زمان خواهید داشت.</p>
+            <div>
+                <input type="number" id="num-questions-input" value="20" min="1">
+            </div>
+            <button class="btn btn-primary" id="start-btn" style="margin-top: 20px;">شروع آزمون</button>
+        </div>
+
+        <!-- Quiz Area -->
+        <div id="quiz-area" style="display: none;">
+            <header>
+                <div class="logo"><i class="fas fa-cogs"></i></div>
+                <h1>آزمون تراشکار CNC</h1>
+                <div id="timer-display"><i class="far fa-clock"></i> <span>--:--</span></div>
+            </header>
+            
+            <div class="exam-info">
+                <div class="info-item"><i class="fas fa-list-ol"></i><span>تعداد کل: <span id="total-q-count">0</span></span></div>
+                <div class="info-item"><i class="fas fa-check-square"></i><span>پاسخ داده شده: <span id="answered-count">0</span></span></div>
+                <div class="info-item"><i class="fas fa-bookmark"></i><span>نشان شده: <span id="marked-count">0</span></span></div>
+            </div>
+            
+            <div class="main-content">
+                <div class="questions-section" id="questions-section">
+                    <!-- Current question will be rendered here by JavaScript -->
+                </div>
+                
+                <div class="question-nav">
+                     <div class="actions">
+                         <div class="btn-group" style="display: flex; justify-content: space-between; width: 100%; gap: 10px;">
+                            <button class="btn btn-primary" id="prev-btn"><i class="fas fa-arrow-right"></i> قبلی</button>
+                            <button class="btn btn-primary" id="next-btn">بعدی <i class="fas fa-arrow-left"></i></button>
+                        </div>
+                        <button class="btn btn-warning" id="mark-btn"><i class="far fa-bookmark"></i> نشان‌گذاری</button>
+                        <button class="btn btn-success" id="submit-btn"><i class="fas fa-paper-plane"></i> تحویل آزمون</button>
+                    </div>
+                    <h3 class="nav-title" style="margin-top: 20px;">پیمایش سوالات</h3>
+                    <div class="question-buttons" id="question-buttons"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Page -->
+        <div class="results-page" id="results-page">
+            <div style="text-align:center; padding: 20px;">
+                <h2>نتایج آزمون</h2>
+                <p id="score" style="font-size: 1.5rem;">نمره شما: <strong style="font-size: 1.8em;">0%</strong></p>
+                <p id="score-summary">شما به 0 سوال از 0 سوال پاسخ صحیح دادید.</p>
+                <button class="btn btn-primary" id="restart-btn" style="margin-top:20px;">شروع آزمون جدید</button>
+            </div>
+            <div id="review-filters" style="text-align: center; padding: 20px; border-top: 1px solid #eee; display: flex; justify-content:center; gap: 15px;">
+                 <button class="btn btn-primary" id="review-all-btn">نمایش همه</button>
+                 <button class="btn btn-warning" id="review-marked-btn">فقط نشان شده ها</button>
+            </div>
+             <div class="review-container" id="review-container">
+                <div id="review-content"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- External JS files -->
+    <script src="questions.js"></script>
+    <script>
+        // --- DOM Elements ---
+        const startContainer = document.getElementById('start-container');
+        const startBtn = document.getElementById('start-btn');
+        const numQuestionsInput = document.getElementById('num-questions-input');
+        const quizArea = document.getElementById('quiz-area');
+        const questionsSection = document.getElementById('questions-section');
+        const questionButtons = document.getElementById('question-buttons');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const markBtn = document.getElementById('mark-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const totalQCount = document.getElementById('total-q-count');
+        const answeredCount = document.getElementById('answered-count');
+        const markedCount = document.getElementById('marked-count');
+        const timerDisplay = document.querySelector('#timer-display span');
+        const resultsPage = document.getElementById('results-page');
+        const scoreElement = document.getElementById('score');
+        const scoreSummary = document.getElementById('score-summary');
+        const restartBtn = document.getElementById('restart-btn');
+        const reviewContent = document.getElementById('review-content');
+        const reviewAllBtn = document.getElementById('review-all-btn');
+        const reviewMarkedBtn = document.getElementById('review-marked-btn');
+
+        // --- Global State ---
+        let currentQuestionIndex = 0;
+        let activeQuizQuestions = [];
+        let userAnswers = [];
+        let markedQuestions = [];
+        let globalTimer;
+        let examSubmitted = false;
+        const allQuestions = typeof questions !== 'undefined' ? questions : [];
+
+        // --- Initialization ---
+        allQuestions.forEach(q => {
+            if (!q.category) {
+                const cncKeywords = ['cnc', 'g-code', 'm-code', 'g01', 'g00', 'g96', 'اسپیندل', 'کنترل عددی', 'محور', 'فرمان', 'سیکل', 'm03', 'm05'];
+                q.category = cncKeywords.some(keyword => q.question.toLowerCase().includes(keyword)) ? 'cnc' : 'other';
+            }
+        });
+
+        // --- Event Listeners ---
+        startBtn.addEventListener('click', generateAndStartQuiz);
+        prevBtn.addEventListener('click', () => navigate(-1));
+        nextBtn.addEventListener('click', handleNextButton);
+        markBtn.addEventListener('click', toggleMarkQuestion);
+        submitBtn.addEventListener('click', confirmAndSubmit);
+        restartBtn.addEventListener('click', () => location.reload());
+        reviewAllBtn.addEventListener('click', () => displayReview('all'));
+        reviewMarkedBtn.addEventListener('click', () => displayReview('marked'));
+
+        // --- Core Functions ---
+        function generateAndStartQuiz() {
+            if (allQuestions.length === 0) {
+                alert("خطا: فایل سوالات (questions.js) بارگذاری نشده یا خالی است.");
+                return;
+            }
+            
+            const requestedCount = parseInt(numQuestionsInput.value, 10);
+            if (isNaN(requestedCount) || requestedCount <= 0 || requestedCount > allQuestions.length) {
+                alert(`لطفا عددی بین 1 تا ${allQuestions.length} وارد کنید.`);
+                return;
+            }
+
+            selectRandomQuestions(requestedCount);
+            startQuiz();
+        }
+
+        function selectRandomQuestions(count) {
+            const cncQuestions = allQuestions.filter(q => q.category === 'cnc');
+            const otherQuestions = allQuestions.filter(q => q.category === 'other');
+            let numCnc = Math.ceil(count * 0.7);
+            let numOther = count - numCnc;
+            if (numCnc > cncQuestions.length) {
+                numCnc = cncQuestions.length;
+                numOther = count - numCnc;
+            }
+            if (numOther < 0) numOther = 0;
+            if (numOther > otherQuestions.length) {
+                numOther = otherQuestions.length;
+                if (count > allQuestions.length) count = allQuestions.length;
+                numCnc = count - numOther;
+            }
+            if (numCnc < 0) numCnc = 0;
+            const shuffledCnc = shuffleArray([...cncQuestions]);
+            const shuffledOther = shuffleArray([...otherQuestions]);
+            const selectedCnc = shuffledCnc.slice(0, numCnc);
+            const selectedOther = shuffledOther.slice(0, numOther);
+            activeQuizQuestions = shuffleArray([...selectedCnc, ...selectedOther]);
+            userAnswers = new Array(activeQuizQuestions.length).fill(null);
+            markedQuestions = new Array(activeQuizQuestions.length).fill(false);
+        }
+        
+        function startQuiz() {
+            examSubmitted = false;
+            currentQuestionIndex = 0;
+            startContainer.style.display = 'none';
+            resultsPage.style.display = 'none';
+            quizArea.style.display = 'block';
+            
+            const totalTime = activeQuizQuestions.length * 60;
+            startGlobalTimer(totalTime);
+            renderUI();
+        }
+
+        function renderUI() {
+            loadQuestion(currentQuestionIndex);
+            renderNavButtons();
+            updateCounters();
+            updateNavButtonsState();
+        }
+
+        function loadQuestion(index) {
+            const question = activeQuizQuestions[index];
+            
+            let imageHTML = '';
+            if (question.image) {
+                imageHTML = `<img src="${question.image}" alt="تصویر سوال" class="question-image">`;
+            }
+
+            let optionsHTML = '';
+            question.options.forEach((option, optIndex) => {
+                let optionContent = '';
+                // Check if option is an object (for text + image) or a string (for text only)
+                if (typeof option === 'object' && option !== null) {
+                    optionContent = `<div class="option-content">`;
+                    if (option.image) {
+                        optionContent += `<img src="${option.image}" class="option-image">`;
+                    }
+                    if (option.text) {
+                        optionContent += `<span>${option.text}</span>`;
+                    }
+                    optionContent += `</div>`;
+                } else {
+                    optionContent = `<span>${option}</span>`;
+                }
+
+                optionsHTML += `
+                    <div class="option ${userAnswers[index] === optIndex ? 'selected' : ''}" data-q-index="${index}" data-opt-index="${optIndex}">
+                        <input type="radio" id="q${index}-opt${optIndex}" name="q${index}" ${userAnswers[index] === optIndex ? 'checked' : ''}>
+                        <label for="q${index}-opt${optIndex}">${optionContent}</label>
+                    </div>`;
+            });
+
+            questionsSection.innerHTML = `
+                <div class="question" id="question-${index}">
+                    <div class="question-header">
+                        <div class="question-number">${index + 1}</div>
+                        <p class="question-text">${question.question}</p>
+                    </div>
+                    ${imageHTML}
+                    <div class="options">${optionsHTML}</div>
+                </div>`;
+                
+            document.querySelectorAll('.option').forEach(el => el.addEventListener('click', handleOptionSelect));
+        }
+
+        function handleOptionSelect(e) {
+            const target = e.currentTarget;
+            const qIndex = parseInt(target.dataset.qIndex);
+            const optIndex = parseInt(target.dataset.optIndex);
+            userAnswers[qIndex] = optIndex;
+            renderNavButtons();
+            updateCounters();
+            const optionsDiv = target.parentElement;
+            optionsDiv.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            target.classList.add('selected');
+        }
+        
+        function renderNavButtons() {
+            questionButtons.innerHTML = '';
+            activeQuizQuestions.forEach((_, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'q-btn';
+                btn.textContent = index + 1;
+                btn.dataset.index = index;
+                if (userAnswers[index] !== null) btn.classList.add('answered');
+                if (markedQuestions[index]) btn.classList.add('marked');
+                if (index === currentQuestionIndex) btn.classList.add('current');
+                btn.addEventListener('click', () => navigateToQuestion(index));
+                questionButtons.appendChild(btn);
+            });
+        }
+
+        function updateCounters() {
+            totalQCount.textContent = activeQuizQuestions.length;
+            answeredCount.textContent = userAnswers.filter(a => a !== null).length;
+            markedCount.textContent = markedQuestions.filter(m => m).length;
+        }
+
+        function navigateToQuestion(index) {
+            currentQuestionIndex = index;
+            renderUI();
+        }
+
+        function navigate(direction) {
+            const newIndex = currentQuestionIndex + direction;
+            if (newIndex >= 0 && newIndex < activeQuizQuestions.length) {
+                navigateToQuestion(newIndex);
+            }
+        }
+        
+        function updateNavButtonsState() {
+            prevBtn.style.visibility = (currentQuestionIndex === 0) ? 'hidden' : 'visible';
+            if (currentQuestionIndex === activeQuizQuestions.length - 1) {
+                nextBtn.innerHTML = 'پایان آزمون <i class="fas fa-flag-checkered"></i>';
+            } else {
+                nextBtn.innerHTML = 'بعدی <i class="fas fa-arrow-left"></i>';
+            }
+            
+            if (markedQuestions[currentQuestionIndex]) {
+                markBtn.innerHTML = '<i class="fas fa-bookmark"></i> حذف نشان';
+                markBtn.classList.remove('btn-warning');
+                markBtn.classList.add('btn-danger');
+            } else {
+                markBtn.innerHTML = '<i class="far fa-bookmark"></i> نشان‌گذاری';
+                markBtn.classList.add('btn-warning');
+                markBtn.classList.remove('btn-danger');
+            }
+        }
+        
+        function handleNextButton() {
+            if (currentQuestionIndex === activeQuizQuestions.length - 1) {
+                confirmAndSubmit();
+            } else {
+                navigate(1);
+            }
+        }
+        
+        function toggleMarkQuestion() {
+            markedQuestions[currentQuestionIndex] = !markedQuestions[currentQuestionIndex];
+            renderNavButtons();
+            updateCounters();
+            updateNavButtonsState();
+        }
+        
+        function startGlobalTimer(duration) {
+            let timer = duration;
+            clearInterval(globalTimer);
+            globalTimer = setInterval(() => {
+                let minutes = parseInt(timer / 60, 10);
+                let seconds = parseInt(timer % 60, 10);
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+                timerDisplay.textContent = `${minutes}:${seconds}`;
+                if (timer < 60) timerDisplay.parentElement.style.color = '#dc3545';
+                if (--timer < 0) {
+                    submitExam();
+                }
+            }, 1000);
+        }
+        
+        function confirmAndSubmit() {
+            const unansweredCount = userAnswers.filter(a => a === null).length;
+            let confirmation = true;
+            if (unansweredCount > 0) {
+                confirmation = confirm(`شما به ${unansweredCount} سوال پاسخ نداده‌اید. آیا مطمئن هستید که می‌خواهید آزمون را تحویل دهید؟`);
+            } else {
+                confirmation = confirm('آیا برای تحویل آزمون و مشاهده نتایج مطمئن هستید؟');
+            }
+            if (confirmation) {
+                submitExam();
+            }
+        }
+
+        function submitExam() {
+            if(examSubmitted) return;
+            examSubmitted = true;
+            clearInterval(globalTimer);
+            
+            let score = 0;
+            activeQuizQuestions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) score++;
+            });
+
+            quizArea.style.display = 'none';
+            resultsPage.style.display = 'block';
+            
+            const percentage = activeQuizQuestions.length > 0 ? ((score / activeQuizQuestions.length) * 100).toFixed(2) : 0;
+            scoreElement.innerHTML = `نمره شما: <strong style="font-size: 1.8em;">${percentage}%</strong>`;
+            scoreSummary.textContent = `شما به ${score} سوال از ${activeQuizQuestions.length} سوال پاسخ صحیح دادید.`;
+            
+            displayReview('all');
+        }
+
+        function displayReview(filter = 'all') {
+            let questionsToReview = (filter === 'marked')
+                ? activeQuizQuestions.map((q, i) => ({q, i})).filter(item => markedQuestions[item.i])
+                : activeQuizQuestions.map((q, i) => ({q, i}));
+
+            if (filter === 'marked' && questionsToReview.length === 0) {
+                reviewContent.innerHTML = '<p style="text-align:center; padding: 20px; font-weight: 500;">هیچ سوالی برای بازبینی نشان‌گذاری نشده است.</p>';
+                return;
+            }
+
+            let reviewHTML = '';
+            questionsToReview.forEach(({q, i}) => {
+                const userAnswerIndex = userAnswers[i];
+                
+                let imageReviewHTML = '';
+                if (q.image) {
+                    imageReviewHTML = `<img src="${q.image}" alt="تصویر سوال" class="question-image">`;
+                }
+                
+                let optionsReviewHTML = '';
+                q.options.forEach((opt, optIndex) => {
+                    let classStr = 'review-option';
+                    if (optIndex === q.answer) classStr += ' correct-answer';
+                    if (optIndex === userAnswerIndex && userAnswerIndex !== q.answer) classStr += ' user-incorrect';
+                    
+                    let optionContent = '';
+                     if (typeof opt === 'object' && opt !== null) {
+                        optionContent = `<div class="option-content">`;
+                        if (opt.image) {
+                            optionContent += `<img src="${opt.image}" class="option-image">`;
+                        }
+                        if (opt.text) {
+                            optionContent += `<span>${opt.text}</span>`;
+                        }
+                        optionContent += `</div>`;
+                    } else {
+                        optionContent = `<span>${opt}</span>`;
+                    }
+                    
+                    optionsReviewHTML += `<div class="${classStr}">${optionContent}</div>`;
+                });
+
+                reviewHTML += `
+                    <div class="review-question">
+                        <p>${i + 1}. ${q.question}</p>
+                        ${imageReviewHTML}
+                        ${optionsReviewHTML}
+                    </div>`;
+            });
+            reviewContent.innerHTML = reviewHTML;
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+    </script>
+</body>
+</html>
