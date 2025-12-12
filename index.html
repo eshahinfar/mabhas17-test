@@ -127,6 +127,13 @@
             font-weight: 600;
             color: var(--dark-color);
         }
+        .question-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+        }
         .options {
             display: flex;
             flex-direction: column;
@@ -151,6 +158,18 @@
             background-color: #d1e7fd;
             border-color: var(--secondary-color);
         }
+        .option-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-grow: 1;
+        }
+        .option-image {
+            height: 50px;
+            width: 80px;
+            object-fit: contain;
+            border-radius: 5px;
+        }
         .option input[type="radio"] {
             margin-left: 10px;
             transform: scale(1.2);
@@ -159,6 +178,7 @@
             cursor: pointer;
             flex-grow: 1;
             font-size: 1.05rem;
+            display: contents;
         }
         .nav-title {
             font-size: 1.3rem;
@@ -197,9 +217,6 @@
             color: white;
             border-color: var(--secondary-color);
             transform: scale(1.1);
-        }
-        .q-btn.marked {
-            position: relative;
         }
         .q-btn.marked::after {
             content: '\\f02e';
@@ -312,6 +329,20 @@
             margin-left: 10px;
             color: var(--warning-color);
         }
+        .explanation-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.9em;
+        }
+        .explanation-table th, .explanation-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+        .explanation-table thead {
+            background-color: #f2f2f2;
+        }
         @media (max-width: 992px) {
             .main-content { flex-direction: column; }
             .questions-section { order: 1; border-left: none; }
@@ -321,7 +352,6 @@
             body { padding: 5px; }
             .container { border-radius: 0; }
             header, .questions-section, .question-nav, .review-container { padding: 15px; }
-            header h1 { font-size: 1.4rem; }
             .options { padding-right: 0; }
         }
     </style>
@@ -334,9 +364,9 @@
             <h2>به آزمون جامع خوش آمدید</h2>
             <p>لطفاً فصل(های) مورد نظر و تعداد سوالات را انتخاب کنید.</p>
             <div id="chapter-selection">
-                <label><input type="checkbox" class="chapter-checkbox" value="1" checked> فصل اول (کلیات)<span class="question-count"></span></label>
-                <label><input type="checkbox" class="chapter-checkbox" value="2" checked> فصل دوم (گروه‌بندی)<span class="question-count"></span></label>
-                <!-- For new chapters, add a new label line here -->
+                <label><input type="checkbox" class="chapter-checkbox" value="1" checked> فصل اول <span class="question-count"></span></label>
+                <label><input type="checkbox" class="chapter-checkbox" value="2" checked> فصل دوم <span class="question-count"></span></label>
+                <label><input type="checkbox" class="chapter-checkbox" value="3" checked> فصل سوم <span class="question-count"></span></label>
             </div>
             <div>
                 <label for="num-questions-input">تعداد سوالات:</label>
@@ -385,19 +415,16 @@
                  <button class="btn btn-primary" id="review-all-btn">نمایش همه</button>
                  <button class="btn btn-warning" id="review-marked-btn">فقط نشان شده ها</button>
             </div>
-             <div class="review-container" id="review-container">
-                <div id="review-content"></div>
-            </div>
+             <div class="review-container" id="review-container"><div id="review-content"></div></div>
         </div>
     </div>
     
     <!-- External JS files -->
     <script src="chapter1.js"></script>
     <script src="chapter2.js"></script>
-    <!-- For new chapters, add a new script tag here -->
+    <script src="chapter3.js"></script>
     
     <script>
-        // --- DOM Elements ---
         const startContainer = document.getElementById('start-container');
         const startBtn = document.getElementById('start-btn');
         const numQuestionsInput = document.getElementById('num-questions-input');
@@ -419,8 +446,6 @@
         const reviewContent = document.getElementById('review-content');
         const reviewAllBtn = document.getElementById('review-all-btn');
         const reviewMarkedBtn = document.getElementById('review-marked-btn');
-
-        // --- Global State ---
         let currentQuestionIndex = 0;
         let activeQuizQuestions = [];
         let userAnswers = [];
@@ -428,31 +453,26 @@
         let globalTimer;
         let examSubmitted = false;
 
-        // --- Initialization ---
         let allQuestions = [];
         if (typeof chapter1Questions !== 'undefined') allQuestions = allQuestions.concat(chapter1Questions);
         if (typeof chapter2Questions !== 'undefined') allQuestions = allQuestions.concat(chapter2Questions);
-        // For new chapters, add a similar line here
-        
+        if (typeof chapter3Questions !== 'undefined') allQuestions = allQuestions.concat(chapter3Questions);
+
         function updateChapterCountsOnLoad() {
             const chapterCounts = {};
             allQuestions.forEach(q => {
                 chapterCounts[q.chapter] = (chapterCounts[q.chapter] || 0) + 1;
             });
-
             document.querySelectorAll('#chapter-selection label').forEach(label => {
                 const checkbox = label.querySelector('input');
-                const chapterValue = checkbox.value;
-                const count = chapterCounts[chapterValue];
+                const count = chapterCounts[checkbox.value];
                 const countSpan = label.querySelector('.question-count');
-
                 if (countSpan && count) {
                     countSpan.textContent = `(${count} سوال)`;
                 }
             });
         }
         
-        // --- Event Listeners ---
         document.addEventListener('DOMContentLoaded', updateChapterCountsOnLoad);
         startBtn.addEventListener('click', generateAndStartQuiz);
         prevBtn.addEventListener('click', () => navigate(-1));
@@ -463,31 +483,26 @@
         reviewAllBtn.addEventListener('click', () => displayReview('all'));
         reviewMarkedBtn.addEventListener('click', () => displayReview('marked'));
 
-        // --- Core Functions ---
         function generateAndStartQuiz() {
             const selectedChapters = Array.from(document.querySelectorAll('.chapter-checkbox:checked')).map(cb => parseInt(cb.value));
             if (selectedChapters.length === 0) {
                 alert("لطفا حداقل یک فصل را برای آزمون انتخاب کنید.");
                 return;
             }
-
             const availableQuestions = allQuestions.filter(q => selectedChapters.includes(q.chapter));
             if (availableQuestions.length === 0) {
                 alert("هیچ سوالی برای فصل(های) انتخاب شده یافت نشد.");
                 return;
             }
-            
             const requestedCount = parseInt(numQuestionsInput.value, 10);
             if (isNaN(requestedCount) || requestedCount <= 0 || requestedCount > availableQuestions.length) {
                 alert(`لطفا عددی بین 1 تا ${availableQuestions.length} (تعداد سوالات موجود) وارد کنید.`);
                 return;
             }
-
             const shuffled = shuffleArray([...availableQuestions]);
             activeQuizQuestions = shuffled.slice(0, requestedCount);
             userAnswers = new Array(activeQuizQuestions.length).fill(null);
             markedQuestions = new Array(activeQuizQuestions.length).fill(false);
-            
             startQuiz();
         }
         
@@ -497,7 +512,6 @@
             startContainer.style.display = 'none';
             resultsPage.style.display = 'none';
             quizArea.style.display = 'block';
-            
             const totalTime = activeQuizQuestions.length * 60;
             startGlobalTimer(totalTime);
             renderUI();
@@ -515,22 +529,18 @@
             let imageHTML = question.image ? `<img src="${question.image}" alt="تصویر سوال" class="question-image">` : '';
             let optionsHTML = '';
             question.options.forEach((option, optIndex) => {
-                optionsHTML += `
-                    <div class="option ${userAnswers[index] === optIndex ? 'selected' : ''}" data-q-index="${index}" data-opt-index="${optIndex}">
-                        <input type="radio" id="q${index}-opt${optIndex}" name="q${index}" ${userAnswers[index] === optIndex ? 'checked' : ''}>
-                        <label for="q${index}-opt${optIndex}">${option}</label>
-                    </div>`;
+                let optionContent = '';
+                if (typeof option === 'object' && option !== null) {
+                    optionContent = `<div class="option-content">`;
+                    if (option.image) optionContent += `<img src="${option.image}" class="option-image">`;
+                    if (option.text) optionContent += `<span>${option.text}</span>`;
+                    optionContent += `</div>`;
+                } else {
+                    optionContent = `<span>${option}</span>`;
+                }
+                optionsHTML += `<div class="option ${userAnswers[index] === optIndex ? 'selected' : ''}" data-q-index="${index}" data-opt-index="${optIndex}"><input type="radio" id="q${index}-opt${optIndex}" name="q${index}" ${userAnswers[index] === optIndex ? 'checked' : ''}><label for="q${index}-opt${optIndex}">${optionContent}</label></div>`;
             });
-
-            questionsSection.innerHTML = `
-                <div class="question" id="question-${index}">
-                    <div class="question-header">
-                        <div class="question-number">${index + 1}</div>
-                        <p class="question-text">${question.question}</p>
-                    </div>
-                    ${imageHTML}
-                    <div class="options">${optionsHTML}</div>
-                </div>`;
+            questionsSection.innerHTML = `<div class="question" id="question-${index}"><div class="question-header"><div class="question-number">${index + 1}</div><p class="question-text">${question.question}</p></div>${imageHTML}<div class="options">${optionsHTML}</div></div>`;
             document.querySelectorAll('.option').forEach(el => el.addEventListener('click', handleOptionSelect));
         }
 
@@ -541,8 +551,7 @@
             userAnswers[qIndex] = optIndex;
             renderNavButtons();
             updateCounters();
-            const optionsDiv = target.parentElement;
-            optionsDiv.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            target.parentElement.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
             target.classList.add('selected');
         }
         
@@ -581,21 +590,10 @@
         
         function updateNavButtonsState() {
             prevBtn.style.visibility = (currentQuestionIndex === 0) ? 'hidden' : 'visible';
-            if (currentQuestionIndex === activeQuizQuestions.length - 1) {
-                nextBtn.innerHTML = 'پایان آزمون <i class="fas fa-flag-checkered"></i>';
-            } else {
-                nextBtn.innerHTML = 'بعدی <i class="fas fa-arrow-left"></i>';
-            }
-            
-            if (markedQuestions[currentQuestionIndex]) {
-                markBtn.innerHTML = '<i class="fas fa-bookmark"></i> حذف نشان';
-                markBtn.classList.remove('btn-warning');
-                markBtn.classList.add('btn-danger');
-            } else {
-                markBtn.innerHTML = '<i class="far fa-bookmark"></i> نشان‌گذاری';
-                markBtn.classList.add('btn-warning');
-                markBtn.classList.remove('btn-danger');
-            }
+            nextBtn.innerHTML = (currentQuestionIndex === activeQuizQuestions.length - 1) ? 'پایان آزمون <i class="fas fa-flag-checkered"></i>' : 'بعدی <i class="fas fa-arrow-left"></i>';
+            markBtn.innerHTML = markedQuestions[currentQuestionIndex] ? '<i class="fas fa-bookmark"></i> حذف نشان' : '<i class="far fa-bookmark"></i> نشان‌گذاری';
+            markBtn.classList.toggle('btn-danger', markedQuestions[currentQuestionIndex]);
+            markBtn.classList.toggle('btn-warning', !markedQuestions[currentQuestionIndex]);
         }
         
         function handleNextButton() {
@@ -617,29 +615,22 @@
             let timer = duration;
             clearInterval(globalTimer);
             globalTimer = setInterval(() => {
-                let minutes = parseInt(timer / 60, 10);
-                let seconds = parseInt(timer % 60, 10);
+                let minutes = Math.floor(timer / 60);
+                let seconds = timer % 60;
                 minutes = minutes < 10 ? "0" + minutes : minutes;
                 seconds = seconds < 10 ? "0" + seconds : seconds;
                 timerDisplay.textContent = `${minutes}:${seconds}`;
-                if (timer < 60) { timerDisplay.parentElement.style.color = '#dc3545'; }
-                if (--timer < 0) {
-                    submitExam();
-                }
+                if (timer < 60) timerDisplay.parentElement.style.color = '#dc3545';
+                if (--timer < 0) submitExam();
             }, 1000);
         }
         
         function confirmAndSubmit() {
             const unansweredCount = userAnswers.filter(a => a === null).length;
-            let confirmation = true;
-            if (unansweredCount > 0) {
-                confirmation = confirm(`شما به ${unansweredCount} سوال پاسخ نداده‌اید. آیا مطمئن هستید که می‌خواهید آزمون را تحویل دهید؟`);
-            } else {
-                confirmation = confirm('آیا برای تحویل آزمون و مشاهده نتایج مطمئن هستید؟');
-            }
-            if (confirmation) {
-                submitExam();
-            }
+            const confirmed = unansweredCount > 0 
+                ? confirm(`شما به ${unansweredCount} سوال پاسخ نداده‌اید. آیا برای تحویل آزمون مطمئن هستید؟`)
+                : confirm('آیا برای تحویل آزمون و مشاهده نتایج مطمئن هستید؟');
+            if (confirmed) submitExam();
         }
 
         function submitExam() {
@@ -647,10 +638,7 @@
             examSubmitted = true;
             clearInterval(globalTimer);
             
-            let score = 0;
-            activeQuizQuestions.forEach((q, i) => {
-                if (userAnswers[i] === q.answer) score++;
-            });
+            let score = activeQuizQuestions.reduce((acc, q, i) => acc + (userAnswers[i] === q.answer ? 1 : 0), 0);
 
             quizArea.style.display = 'none';
             resultsPage.style.display = 'block';
@@ -663,7 +651,7 @@
         }
 
         function displayReview(filter = 'all') {
-            let questionsToReview = (filter === 'marked')
+            const questionsToReview = (filter === 'marked')
                 ? activeQuizQuestions.map((q, i) => ({q, i})).filter(item => markedQuestions[item.i])
                 : activeQuizQuestions.map((q, i) => ({q, i}));
 
@@ -672,30 +660,31 @@
                 return;
             }
 
-            let reviewHTML = '';
-            questionsToReview.forEach(({q, i}) => {
+            reviewContent.innerHTML = questionsToReview.map(({q, i}) => {
                 const userAnswerIndex = userAnswers[i];
-                let optionsReviewHTML = '';
-                q.options.forEach((opt, optIndex) => {
+                const imageReviewHTML = q.image ? `<img src="${q.image}" alt="تصویر سوال" class="question-image">` : '';
+                const explanationHTML = q.explanation ? `<div class="review-explanation">${q.explanation}</div>` : '';
+                
+                const optionsReviewHTML = q.options.map((opt, optIndex) => {
                     let classStr = 'review-option';
                     if (optIndex === q.answer) classStr += ' correct-answer';
                     if (optIndex === userAnswerIndex && userAnswerIndex !== q.answer) classStr += ' user-incorrect';
-                    optionsReviewHTML += `<div class="${classStr}">${opt}</div>`;
-                });
-                
-                let explanationHTML = '';
-                if (q.explanation) {
-                    explanationHTML = `<div class="review-explanation">${q.explanation}</div>`;
-                }
+                    
+                    let optionContent = '';
+                     if (typeof opt === 'object' && opt !== null) {
+                        optionContent = `<div class="option-content">`;
+                        if (opt.image) optionContent += `<img src="${opt.image}" class="option-image">`;
+                        if (opt.text) optionContent += `<span>${opt.text}</span>`;
+                        optionContent += `</div>`;
+                    } else {
+                        optionContent = `<span>${opt}</span>`;
+                    }
+                    
+                    return `<div class="${classStr}">${optionContent}</div>`;
+                }).join('');
 
-                reviewHTML += `
-                    <div class="review-question">
-                        <p>${i + 1}. ${q.question}</p>
-                        ${optionsReviewHTML}
-                        ${explanationHTML}
-                    </div>`;
-            });
-            reviewContent.innerHTML = reviewHTML;
+                return `<div class="review-question"><p>${i + 1}. ${q.question}</p>${imageReviewHTML}${optionsReviewHTML}${explanationHTML}</div>`;
+            }).join('');
         }
 
         function shuffleArray(array) {
